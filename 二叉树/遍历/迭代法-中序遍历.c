@@ -24,8 +24,8 @@ int* inorderTraversal(struct TreeNode* root, int* returnSize){
             node = node->left;
         }
         node = stack[top-1];
-        result[(*returnSize)++] = node->val;
         top --;
+        result[(*returnSize)++] = node->val;
         node = node->right;
     }
 
