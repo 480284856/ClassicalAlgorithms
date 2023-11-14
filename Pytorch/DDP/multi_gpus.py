@@ -89,7 +89,7 @@ def model_preparation(
     )
 
 def train(self):
-    for num_epoch in range(self.run_epoch+1, self.epoch):
+    for num_epoch in range(self.run_epoch, self.epoch):
         if(self.local_rank==0):
             self.iterator.set_description("Training:")
         self._run_epoch()
