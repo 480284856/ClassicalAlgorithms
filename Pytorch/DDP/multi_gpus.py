@@ -102,17 +102,9 @@ def train(self):
             self.iterator.update()
     self._save_checkpoint(num_epoch)
 
-def _resume_from_checkpoint(self, resume_chekcpoint_file):
-    ckpt = torch.load(resume_chekcpoint_file, map_location=self.gpu_device)
-    self.run_epoch = ckpt["epoch"]
-    self.model.module.load_state_dict(ckpt["state_dict"])
-    if(self.local_rank==0):
-        self.iterator.update(self.run_epoch)
-
 def main(rank, world_size, master_port):
     local_rank=rank
     setattr(Trainer,'train',train)
-    setattr(Trainer, '_resume_from_checkpoint', _resume_from_checkpoint)
     ddp_initialization(
         local_rank=local_rank,
         world_size=world_size,
