@@ -102,27 +102,9 @@ class Trainer:
             batch = batch.to(self.gpu_device)
             label = label.to(self.gpu_device)
             self._learning_once(batch,label)
-    
-    def _save_checkpoint(self,num_epoch):
-        ckp = self.model.state_dict()
-        tings2save = {
-            "state_dict":ckp,
-            "epoch":num_epoch
-        }
-        if(self.local_rank==0):
-            self.iterator.write(f"saving checkpoint.bin_{num_epoch}")
-        torch.save(tings2save, f"checkpoint.bin_{num_epoch}")
-    
-    def _resume_from_checkpoint(self, resume_chekcpoint_file):
-
-        ckpt = torch.load(resume_chekcpoint_file, map_location=self.gpu_device)
-        self.run_epoch = ckpt["epoch"]+1
-        self.model.load_state_dict(ckpt["state_dict"])
-        if(self.local_rank==0):
-            self.iterator.update(self.run_epoch)
-
+            
     def train(self):
-        for num_epoch in range(self.run_epoch+1, self.epoch):
+        for num_epoch in range(self.run_epoch, self.epoch):
             self._run_epoch()
             
             if((num_epoch+1)%self.evalute_every==0):
@@ -138,6 +120,7 @@ class Trainer:
     def evaluate(self, current_epoch):
         if(self.local_rank==0):
             self.iterator.set_description("Evaluation:")
+            self.iterator.set_postfix_str("")
         for batch,label in self.evaluate_data_loader:
             batch = batch.to(self.gpu_device)
             label = label.to(self.gpu_device)  
@@ -161,7 +144,26 @@ class Trainer:
         calculate the accuracy of inference
         '''
         return (sum(predictions==label)/len(predictions)).item()*100
+        
+    def _save_checkpoint(self,num_epoch):
+        ckp = self.model.state_dict()
+        tings2save = {
+            "state_dict":ckp,
+            "epoch":num_epoch
+        }
+        if(self.local_rank==0):
+            self.iterator.write(f"saving checkpoint.bin_{num_epoch}")
+        torch.save(tings2save, f"checkpoint.bin_{num_epoch}")
     
+    def _resume_from_checkpoint(self, resume_chekcpoint_file):
+
+        ckpt = torch.load(resume_chekcpoint_file, map_location=self.gpu_device)
+        self.run_epoch = ckpt["epoch"]+1
+        self.model.load_state_dict(ckpt["state_dict"])
+        if(self.local_rank==0):
+            self.iterator.update(self.run_epoch)
+
+
 class Data(Dataset):
     def __init__(
             self,
