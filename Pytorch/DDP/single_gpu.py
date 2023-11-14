@@ -116,7 +116,7 @@ class Trainer:
     def _resume_from_checkpoint(self, resume_chekcpoint_file):
 
         ckpt = torch.load(resume_chekcpoint_file, map_location=self.gpu_device)
-        self.run_epoch = ckpt["epoch"]
+        self.run_epoch = ckpt["epoch"]+1
         self.model.load_state_dict(ckpt["state_dict"])
         if(self.local_rank==0):
             self.iterator.update(self.run_epoch)
